@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infinite UI</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for a nice, clean font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* Basic styling and theme setup */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #111827; /* Tailwind gray-900 */
+            color: #F9FAFB; /* Tailwind gray-50 */
+        }
+        /* Custom animation for the loading spinner */
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.2);
+            border-left-color: #3B82F6; /* Tailwind blue-500 */
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        /* Style for the generated content to ensure smooth transitions */
+        #content-container > * {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div class="min-h-screen flex flex-col items-center justify-center p-4">
+
+      <br><br>
+        
+        <header class="w-full max-w-4xl mx-auto text-center mb-8">
+            <h1 class="text-4xl font-bold tracking-tight text-white sm:text-5xl md:text-6xl">Infinite UI</h1>
+            <p class="mt-4 text-lg text-gray-400">Describe a UI, and a local LLM will build it. Interact with the generated UI to create new ones.</p>
+        </header>
+
+        
+
+        <!-- Initial Prompt Section -->
+        <div id="initial-prompt-section" class="w-full max-w-2xl bg-gray-800 rounded-lg p-6 shadow-lg mb-8">
+            <label for="prompt-input" class="block text-sm font-medium text-gray-300 mb-2">Your Initial UI Prompt</label>
+            <div class="flex flex-col sm:flex-row gap-4">
+                <input type="text" id="prompt-input" class="flex-grow bg-gray-900 border border-gray-700 text-white rounded-md px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="e.g., A dashboard for a smart home">
+                <button id="generate-button" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-md transition-colors duration-300">
+                    Generate
+                </button>
+            </div>
+        </div>
+
+        <!-- New UI Customization Options -->
+        <div class="w-full max-w-2xl bg-gray-800 rounded-lg p-6 shadow-lg mb-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div>
+                <label for="ui-type-select" class="block text-sm font-medium text-gray-300 mb-2">UI Type</label>
+                <select id="ui-type-select" class="w-full bg-gray-900 border border-gray-700 text-white rounded-md px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    <option value="MacOS-UI">MacOS UI</option>
+                    <option value="iOS-app">iOS App UI</option>
+                    <option value="dashboard">Dashboard UI</option>
+                    <option value="landing-page">Landing Page UI</option>
+                    <option value="portfolio-page">Portfolio Page UI</option>
+                    <option value="e-commerce-page">E-commerce Page UI</option>
+                </select>
+            </div>
+            <div>
+                <label for="theme-select" class="block text-sm font-medium text-gray-300 mb-2">Theme</label>
+                <select id="theme-select" class="w-full bg-gray-900 border border-gray-700 text-white rounded-md px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    <option value="dark">Dark Theme</option>
+                    <option value="light">Light Theme</option>
+                    <option value="modern">Modern Theme</option>
+                    <option value="minimalist">Minimalist Theme</option>
+                    <option value="futuristic">Futuristic Theme</option>
+                    <option value="cyberpunk">Cyberpunk Theme</option>
+                    <option value="early-2000s">Early 2000s Theme</option>
+                    <option value="windows-98">Windows 98 Theme</option>
+                </select>
+            </div>
+            <div>
+                <label for="color-select" class="block text-sm font-medium text-gray-300 mb-2">Color Palette</label>
+                <select id="color-select" class="w-full bg-gray-900 border border-gray-700 text-white rounded-md px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    <option value="default">Default</option>
+                    <option value="blue-purple">Blue/Purple Accents</option>
+                    <option value="green-teal">Green/Teal Accents</option>
+                    <option value="warm-tones">Warm Tones (Orange/Red)</option>
+                    <option value="monochromatic">Monochromatic Gray</option>
+                </select>
+            </div>
+            <div>
+                <label for="font-select" class="block text-sm font-medium text-gray-300 mb-2">Font Style</label>
+                <select id="font-select" class="w-full bg-gray-900 border border-gray-700 text-white rounded-md px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    <option value="default">Default</option>
+                    <option value="sans-serif">Clean Sans-Serif</option>
+                    <option value="serif">Classic Serif</option>
+                    <option value="monospace">Modern Monospace</option>
+                    <option value="futuristic">Slightly Futuristic</option>
+                </select>
+            </div>
+        </div>
+
+
+
+        <!-- Container for the generated UI -->
+        <main id="content-container" class="w-full max-w-4xl min-h-[300px] bg-gray-800 rounded-xl shadow-2xl p-6 flex items-center justify-center transition-all duration-500">
+            <!-- Loading indicator -->
+            <div id="loading-indicator" class="hidden flex-col items-center justify-center text-center">
+                <div class="spinner mb-4"></div>
+                <p class="text-gray-400">Generating UI with local model...</p>
+            </div>
+            <!-- Error message display -->
+            <div id="error-display" class="hidden text-red-400 text-center"></div>
+            <!-- Welcome message -->
+            <div id="welcome-message" class="text-center">
+                <h2 class="text-2xl font-medium text-gray-300">Your Generated UI Will Appear Here</h2>
+                <p class="text-gray-500 mt-2">Enter a prompt above and click "Generate" to begin.</p>
+            </div>
+        </main>
+        
+<br><br><br>
+
+        <!-- Instructions and Status Section -->
+        <div class="w-full max-w-2xl bg-gray-800/50 border border-gray-700 rounded-lg p-4 text-center mb-8">
+          <h3 class="font-semibold text-white">How to use this:</h3>
+          <p class="text-sm text-gray-400">
+              1. Run <a href="https://lmstudio.ai/" target="_blank" class="text-blue-400 hover:underline">LM Studio</a> and download a model (e.g., <a href="https://huggingface.co/Qwen/Qwen2.5-Coder-14B-Instruct-GGUF" target="_blank" class="text-blue-400 hover:underline">qwen2.5-coder</a>).
+              <br>2. Go to the "Developer" tab and start the server.
+              <br>3. Ensure the server is running on `http://127.0.0.1:1234`.
+              <br>4. Ensure LM Studio is configured to allow CORS requests.
+              <br>5. If you have issues,ensure context length is greater than 8000 tokens.
+          </p>
+     </div>
+
+    </div>
+
+    <script type="module">
+        // Ensure the DOM is fully loaded before running the script
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log("Script loaded and DOMContentLoaded fired.");
+
+            // --- CONFIGURATION ---
+            // This should match the server address from LM Studio
+            const API_URL = 'http://127.0.0.1:1234/v1/chat/completions'; // Confirmed from previous steps
+
+            // --- DOM ELEMENT REFERENCES ---
+            const promptInput = document.getElementById('prompt-input');
+            const generateButton = document.getElementById('generate-button');
+            const contentContainer = document.getElementById('content-container');
+            const loadingIndicator = document.getElementById('loading-indicator');
+            const welcomeMessage = document.getElementById('welcome-message');
+            const errorDisplay = document.getElementById('error-display');
+
+            // New UI customization elements
+            const uiTypeSelect = document.getElementById('ui-type-select');
+            const themeSelect = document.getElementById('theme-select');
+            const colorSelect = document.getElementById('color-select');
+            const fontSelect = document.getElementById('font-select');
+
+
+            // Initial check to ensure all elements were found
+            if (!promptInput || !generateButton || !contentContainer || !loadingIndicator || !welcomeMessage || !errorDisplay ||
+                !uiTypeSelect || !themeSelect || !colorSelect || !fontSelect) {
+                console.error("One or more required DOM elements were not found. Please check HTML IDs.");
+                return; // Stop script execution if elements are missing
+            } else {
+                console.log("All essential DOM elements found.");
+            }
+
+            /**
+             * Cleans the raw response from the LLM.
+             * It removes markdown code block fences (```html ... ```) and trims whitespace.
+             * @param {string} rawHtml - The raw string response from the model.
+             * @returns {string} The cleaned HTML string.
+             */
+            function cleanHtmlResponse(rawHtml) {
+                // The model might wrap the HTML in markdown-style code blocks.
+                // This regex removes the opening and closing fences.
+                let cleaned = rawHtml.replace(/^```html\s*|```\s*$/g, '').trim();
+                
+                // Aggressively remove any remaining full HTML boilerplate, style, or script tags
+                cleaned = cleaned.replace(/<!DOCTYPE html>[\s\S]*?<html[^>]*>[\s\S]*?<head>[\s\S]*?<\/head>[\s\S]*?<body[^>]*>/i, '');
+                cleaned = cleaned.replace(/<\/body>[\s\S]*?<\/html>/i, '');
+                cleaned = cleaned.replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, ''); // Remove <style> blocks
+                cleaned = cleaned.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, ''); // Remove <script> blocks
+                
+                return cleaned.trim();
+            }
+
+            /**
+             * The core function to fetch UI from the local model and render it.
+             * @param {string} userPrompt - The prompt describing the desired UI.
+             */
+            async function fetchAndRenderUI(userPrompt) {
+                console.log("Calling fetchAndRenderUI with prompt:", userPrompt);
+
+                // 1. Update UI to show loading state
+                contentContainer.innerHTML = ''; // Clear previous content
+                loadingIndicator.classList.remove('hidden');
+                loadingIndicator.classList.add('flex');
+                errorDisplay.classList.add('hidden');
+                welcomeMessage.classList.add('hidden');
+
+                // Get selected customization options
+                const uiType = uiTypeSelect.value;
+                const theme = themeSelect.value;
+                const colorPalette = colorSelect.value;
+                const fontStyle = fontSelect.value;
+
+                // 2. Craft the detailed system prompt for the LLM
+                // Reinforced prompt to ensure only HTML + Tailwind is returned
+                const systemPrompt = `
+                    You are an expert web developer specializing in creating modern, responsive UI components.
+                    Your task is to generate clean, single-file HTML using Tailwind CSS classes based on a user's request.
+
+                    **STRICT CRITICAL INSTRUCTIONS:**
+                    1.  **ONLY respond with the RAW HTML code fragment for the component.**
+                    2.  **DO NOT include any of the following:**
+                        * \`<!DOCTYPE html>\`
+                        * \`<html>\`, \`<head>\`, \`<body>\` tags (or any other full HTML boilerplate).
+                        * Markdown fences like \`\`\`html.
+                        * Any conversational text, explanations, or code blocks outside the pure HTML.
+                        * Inline \`<style>\` tags or external CSS file references.
+                        * \`<script>\` tags or JavaScript code.
+                    3.  **Use Tailwind CSS for ALL styling.**
+                    4.  **For any interactive element that should trigger a NEW UI generation (like buttons, links, etc.), you MUST use the global JavaScript function \`window.generateNextUI('new, very detailed, 2-3 sentence prompt for the next screen')\` in the 'onclick' attribute.**
+                    5.  The prompt you pass to \`window.generateNextUI\` must be a descriptive string telling me what UI to generate next.
+                    6.  **Generate a full and somplete website and UI every time, and give full and complete results. 
+                    7.  **Ensure good contrast and readability, include a nav bar ABOVE content when possible.**
+                    8.  **Incorporate the following styling preferences into the generated UI:**
+                        * UI Type (size and style): ${uiType}
+                        * Theme: ${theme} MOST IMPORTANT PART
+                        * Color Palette: ${colorPalette}
+                        * Font Style: ${fontStyle}
+                    9. Ensure results ALWAYS follow the guidelines set in 8. Ensure the theme styling is consitent through ALL UI generations and carries over to the next generation. 
+
+                    10.  **EXAMPLE of a correct button output:**
+                        \`<button onclick="window.generateNextUI('Show a detailed user profile page for <content> that has <componnents/styles/detailed context>')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-md transition-colors duration-300 shadow-md">View Profile</button>\`
+                    11. **EXAMPLE of a correct link output:**
+                        \`<a href="#" onclick="event.preventDefault(); window.generateNextUI('Load the settings page with (more context here based on color and theme context, and previous ui content.)')" class="text-blue-400 hover:underline transition-colors duration-200">Settings</a>\`
+
+                    12. Ensure at least 3-5 links or clickable options are available for the next generation.
+
+                    **UI THEME EXAMPLE STYLES (FOLLOW THIS AS A GUIDE, CONTENT SHOULD BE DYNAMIC NOT SET TO THIS)**
+    
+    
+                    1. Dark theme:
+                    <!-- Dark Theme Component Showcase -->
+<div class="w-[420px] bg-[#23232b] border border-[#27272a] rounded-lg shadow-lg p-6 space-y-6 font-mono">
+  <h1 class="text-2xl font-bold text-white flex items-center gap-2">
+    <span class="w-2 h-2 bg-[#60a5fa] rounded-full animate-pulse"></span>
+    Dark Theme Header
+  </h1>
+  <p class="text-[#a1a1aa] italic">This is a paragraph in the dark theme. It uses subtle gray text for readability.</p>
+  <div class="bg-[#18181b] border border-[#27272a] rounded p-4 shadow-inner">
+    <h2 class="text-lg font-semibold text-white mb-1 flex items-center gap-1">
+      <span class="text-[#60a5fa]">★</span> Card Title
+    </h2>
+    <p class="text-[#a1a1aa] mb-2">A card with dark background and border.</p>
+    <button class="px-3 py-1 bg-gradient-to-r from-[#27272a] to-[#18181b] text-white rounded hover:bg-[#3f3f46] border border-[#3f3f46] shadow">Dark Button</button>
+  </div>
+  <a href="#" class="text-[#60a5fa] hover:underline hover:text-white transition">Dark Theme Link →</a>
+  <div class="flex items-center gap-2">
+    <input type="text" placeholder="Dark input" class="flex-1 bg-[#18181b] border border-[#27272a] text-white px-3 py-2 rounded focus:outline-none focus:border-[#60a5fa] placeholder-[#52525b]" />
+    <span class="text-[#a1a1aa] text-xs">⌨️</span>
+  </div>
+  <div class="flex items-center gap-2 text-xs text-[#52525b]">
+    <span class="w-2 h-2 bg-[#f87171] rounded-full"></span>
+    <span class="w-2 h-2 bg-[#fbbf24] rounded-full"></span>
+    <span class="w-2 h-2 bg-[#34d399] rounded-full"></span>
+    <span class="ml-2">Status: <span class="text-[#60a5fa]">Online</span></span>
+  </div>
+</div>
+
+
+
+    2. Light Theme:
+    <!-- Light Theme Component Showcase -->
+<div class="w-[420px] bg-white border border-[#e5e7eb] rounded-lg shadow-lg p-6 space-y-6 font-sans">
+  <h1 class="text-2xl font-bold text-[#111827] flex items-center gap-2">
+    <span class="bg-[#fbbf24] w-4 h-4 rounded-full flex items-center justify-center text-xs text-white">☀️</span>
+    Light Theme Header
+  </h1>
+  <p class="text-[#6b7280]">This is a paragraph in the light theme. Clean and easy to read.</p>
+  <div class="bg-[#f3f4f6] border border-[#e5e7eb] rounded p-4 shadow">
+    <h2 class="text-lg font-semibold text-[#111827] mb-1">Card Title <span class="ml-1 text-[#fbbf24]">•</span></h2>
+    <p class="text-[#6b7280] mb-2">A card with a light background and border.</p>
+    <button class="px-3 py-1 bg-[#e5e7eb] text-[#111827] rounded hover:bg-[#d1d5db] border border-[#d1d5db] shadow-sm">Light Button</button>
+  </div>
+  <a href="#" class="text-[#2563eb] hover:underline hover:text-[#1d4ed8] transition">Light Theme Link</a>
+  <div class="flex items-center gap-2">
+    <input type="text" placeholder="Light input" class="flex-1 bg-white border border-[#e5e7eb] text-[#111827] px-3 py-2 rounded focus:outline-none focus:border-[#2563eb] placeholder-[#9ca3af]" />
+    <span class="text-[#fbbf24] text-lg">📝</span>
+  </div>
+  <div class="flex items-center gap-2 text-xs text-[#6b7280]">
+    <span class="w-2 h-2 bg-[#34d399] rounded-full"></span>
+    <span class="ml-2">All systems normal</span>
+  </div>
+</div>
+
+
+  3. Modern:
+  <!-- Modern Theme Component Showcase -->
+<div class="w-[420px] bg-white border border-[#e0e7ef] rounded-2xl shadow-2xl p-8 space-y-7 font-sans">
+  <h1 class="text-2xl font-semibold text-[#2563eb] flex items-center gap-2">
+    <span class="bg-gradient-to-r from-[#2563eb] to-[#60a5fa] w-6 h-6 rounded-full flex items-center justify-center text-white">🌐</span>
+    Modern Theme Header
+  </h1>
+  <p class="text-[#64748b]">A modern, clean paragraph with subtle blue-gray text.</p>
+  <div class="bg-[#f1f5f9] border border-[#e0e7ef] rounded-xl p-5 shadow-lg">
+    <h2 class="text-lg font-semibold text-[#2563eb] mb-1 flex items-center gap-1">Card Title <span class="text-[#60a5fa]">⏩</span></h2>
+    <p class="text-[#64748b] mb-3">A modern card with rounded corners and soft colors.</p>
+    <button class="px-4 py-2 bg-[#2563eb] text-white rounded-full hover:bg-[#1d4ed8] transition font-medium shadow">Modern Button</button>
+  </div>
+  <a href="#" class="text-[#2563eb] hover:underline hover:text-[#1d4ed8] transition font-medium">Modern Theme Link</a>
+  <div class="flex items-center gap-2">
+    <input type="text" placeholder="Modern input" class="flex-1 bg-[#f1f5f9] border border-[#e0e7ef] text-[#2563eb] px-4 py-2 rounded-full focus:outline-none focus:border-[#2563eb] placeholder-[#94a3b8]" />
+    <span class="text-[#2563eb] text-xl">🔍</span>
+  </div>
+  <div class="flex items-center gap-2 text-xs text-[#64748b]">
+    <span class="w-2 h-2 bg-[#2563eb] rounded-full animate-pulse"></span>
+    <span class="ml-2">Connected</span>
+  </div>
+</div>
+
+
+  4. Minimalist: 
+  <!-- Minimalist Theme Component Showcase -->
+<div class="w-[420px] bg-white border border-[#e5e7eb] rounded-lg p-6 space-y-6 font-sans">
+  <h1 class="text-2xl font-semibold text-[#111827] flex items-center gap-2">
+    <span class="text-[#6b7280] text-lg">●</span>
+    Minimalist Header
+  </h1>
+  <p class="text-[#6b7280]">A minimalist paragraph with muted gray text.</p>
+  <div class="bg-white border border-[#e5e7eb] rounded p-4 flex flex-col gap-1">
+    <h2 class="text-lg font-semibold text-[#111827] mb-1">Card Title</h2>
+    <p class="text-[#6b7280] mb-2">A simple card with minimal styling.</p>
+    <button class="px-3 py-1 bg-white text-[#111827] border border-[#e5e7eb] rounded hover:bg-[#f3f4f6] transition">Minimal Button</button>
+  </div>
+  <a href="#" class="text-[#2563eb] hover:underline">Minimalist Link</a>
+  <div class="flex items-center gap-2">
+    <input type="text" placeholder="Minimal input" class="flex-1 bg-white border border-[#e5e7eb] text-[#111827] px-3 py-2 rounded focus:outline-none focus:border-[#2563eb] placeholder-[#9ca3af]" />
+    <span class="text-[#6b7280] text-lg">_</span>
+  </div>
+  <div class="flex items-center gap-2 text-xs text-[#6b7280]">
+    <span class="w-2 h-2 bg-[#6b7280] rounded-full"></span>
+    <span class="ml-2">Idle</span>
+  </div>
+</div>
+
+
+  5. Futuristic:
+  <!-- Futuristic Theme Component Showcase -->
+<div class="w-[420px] bg-[#181a1b] border border-[#00fff7] rounded-2xl shadow-2xl p-8 space-y-7 font-mono">
+  <h1 class="text-2xl font-bold text-[#00fff7] tracking-widest flex items-center gap-2">
+    <span class="bg-gradient-to-r from-[#00fff7] to-[#00c3ff] w-6 h-6 rounded-full flex items-center justify-center text-[#181a1b]">⚡</span>
+    FUTURISTIC HEADER
+  </h1>
+  <p class="text-[#00fff7] uppercase tracking-wide">A paragraph with neon blue text for a futuristic vibe.</p>
+  <div class="bg-[#232526] border border-[#00fff7] rounded-xl p-5 shadow-lg">
+    <h2 class="text-lg font-bold text-[#00fff7] mb-1 tracking-widest flex items-center gap-1">Card Title <span class="text-[#00c3ff]">⧉</span></h2>
+    <p class="text-[#00fff7] mb-3">A card with glowing borders and dark background.</p>
+    <button class="px-4 py-2 bg-gradient-to-r from-[#00fff7] to-[#00c3ff] text-[#181a1b] font-bold rounded-full hover:from-[#00c3ff] hover:to-[#00fff7] transition shadow-lg border border-[#00fff7]">Futuristic Button</button>
+  </div>
+  <a href="#" class="text-[#00fff7] hover:underline hover:text-[#00c3ff] transition">Futuristic Link →</a>
+  <div class="flex items-center gap-2">
+    <input type="text" placeholder="Futuristic input" class="flex-1 bg-[#232526] border border-[#00fff7] text-[#00fff7] px-4 py-2 rounded-full focus:outline-none focus:border-[#00c3ff] placeholder-[#00fff7]/60 tracking-widest" />
+    <span class="text-[#00fff7] text-xl animate-pulse">⌨️</span>
+  </div>
+  <div class="flex items-center gap-2 text-xs text-[#00fff7]">
+    <span class="w-2 h-2 bg-[#00fff7] rounded-full animate-ping"></span>
+    <span class="ml-2">SYSTEM: <span class="text-[#00c3ff]">ACTIVE</span></span>
+  </div>
+</div>
+
+
+  6. Cyberpunk:
+<!-- Cyberpunk Theme Component Showcase -->
+<div class="w-[420px] bg-[#18122b] border-2 border-[#ff00ea] rounded-2xl shadow-2xl p-8 space-y-7 font-mono">
+  <h1 class="text-2xl font-bold text-[#ff00ea] tracking-widest flex items-center gap-2">
+    <span class="bg-gradient-to-r from-[#ff00ea] to-[#00fff7] w-6 h-6 rounded-full flex items-center justify-center text-[#18122b]">🦾</span>
+    CYBERPUNK HEADER
+  </h1>
+  <p class="text-[#00fff7] uppercase">A paragraph with neon blue for that cyberpunk glow.</p>
+  <div class="bg-[#232526] border border-[#ff00ea] rounded-xl p-5 shadow-lg">
+    <h2 class="text-lg font-bold text-[#ff00ea] mb-1 tracking-widest flex items-center gap-1">Card Title <span class="text-[#00fff7]">✦</span></h2>
+    <p class="text-[#00fff7] mb-3">A card with magenta borders and dark background.</p>
+    <button class="px-4 py-2 bg-gradient-to-r from-[#ff00ea] to-[#00fff7] text-[#18122b] font-bold rounded-full hover:from-[#00fff7] hover:to-[#ff00ea] transition shadow-lg border border-[#ff00ea]">Cyberpunk Button</button>
+  </div>
+  <a href="#" class="text-[#ff00ea] hover:underline hover:text-[#00fff7] transition">Cyberpunk Link →</a>
+  <div class="flex items-center gap-2">
+    <input type="text" placeholder="Cyberpunk input" class="flex-1 bg-[#232526] border border-[#ff00ea] text-[#00fff7] px-4 py-2 rounded-full focus:outline-none focus:border-[#ff00ea] placeholder-[#ff00ea]/60 tracking-widest" />
+    <span class="text-[#ff00ea] text-xl animate-pulse">💾</span>
+  </div>
+  <div class="flex items-center gap-2 text-xs text-[#ff00ea]">
+    <span class="w-2 h-2 bg-[#ff00ea] rounded-full animate-ping"></span>
+    <span class="ml-2">NEON: <span class="text-[#00fff7]">ON</span></span>
+  </div>
+</div>
+
+
+  7. Early 2000s:
+<!-- Early 2000s Theme Component Showcase -->
+<div class="w-[420px] bg-[#f5faff] border-2 border-[#7baaf7] rounded-xl shadow-lg p-6 space-y-6 font-sans">
+  <h1 class="text-2xl font-bold text-[#1e293b] flex items-center gap-2">
+    <span class="bg-[#7baaf7] w-6 h-6 rounded shadow flex items-center justify-center text-white">🖱️</span>
+    2000s Header
+  </h1>
+  <p class="text-[#1e293b]">A paragraph with classic blue-gray text and a <span class="bg-[#e3eafc] px-1 rounded">highlight</span>.</p>
+  <div class="bg-[#e3eafc] border border-[#7baaf7] rounded p-4 shadow">
+    <h2 class="text-lg font-bold text-[#1e293b] mb-1 flex items-center gap-1">Card Title <span class="text-[#7baaf7]">💾</span></h2>
+    <p class="text-[#1e293b] mb-2">A card with soft blue background and border.</p>
+    <button class="px-3 py-1 bg-[#7baaf7] text-white rounded hover:bg-[#1e293b] shadow">2000s Button</button>
+  </div>
+  <a href="#" class="text-[#7baaf7] underline hover:text-[#1e293b] transition">2000s Link</a>
+  <div class="flex items-center gap-2">
+    <input type="text" placeholder="2000s input" class="flex-1 bg-white border border-[#7baaf7] text-[#1e293b] px-3 py-2 rounded focus:outline-none focus:border-[#7baaf7] placeholder-[#64748b]" />
+    <span class="text-[#7baaf7] text-lg">📎</span>
+  </div>
+  <div class="flex items-center gap-2 text-xs text-[#1e293b]">
+    <span class="w-2 h-2 bg-[#7baaf7] rounded-full"></span>
+    <span class="ml-2">Clippy is ready</span>
+  </div>
+</div>
+
+
+  8. Windows 98:
+  <!-- Windows 98 Theme Component Showcase -->
+<div class="w-[420px] bg-[#c0c0c0] border-2 border-[#fff] border-b-[#808080] border-r-[#808080] shadow-[4px_4px_0_0_#000] p-4 space-y-5 font-mono">
+  <h1 class="text-2xl font-bold text-[#000] drop-shadow flex items-center gap-2">
+    <span class="bg-[#000080] w-6 h-6 flex items-center justify-center rounded text-white border-2 border-[#fff]">🗔</span>
+    Win98 Header
+  </h1>
+  <p class="text-[#222]">A paragraph with classic Windows 98 colors and <span class="border-b-2 border-dotted border-[#000080]">dotted underline</span>.</p>
+  <div class="bg-[#fff] border-2 border-t-[#fff] border-l-[#fff] border-b-[#808080] border-r-[#808080] rounded p-3 shadow">
+    <h2 class="text-lg font-bold text-[#000] mb-1 flex items-center gap-1">Card Title <span class="text-[#000080]">🖨️</span></h2>
+    <p class="text-[#222] mb-2">A card with beveled borders and white background.</p>
+    <button class="px-3 py-1 bg-[#e0e0e0] border-2 border-t-[#fff] border-l-[#fff] border-b-[#808080] border-r-[#808080] text-[#000] rounded shadow-[2px_2px_0_0_#808080] hover:bg-[#d0d0d0]">Win98 Button</button>
+  </div>
+  <a href="#" class="text-[#000080] underline hover:text-[#1084d0]">Win98 Link</a>
+  <div class="flex items-center gap-2">
+    <input type="text" placeholder="Win98 input" class="flex-1 bg-[#fff] border-2 border-t-[#fff] border-l-[#fff] border-b-[#808080] border-r-[#808080] text-[#000] px-3 py-2 rounded focus:outline-none focus:border-[#000080] placeholder-[#808080]" />
+    <span class="text-[#000080] text-lg">⌨️</span>
+  </div>
+  <div class="flex items-center gap-2 text-xs text-[#222]">
+    <span class="w-2 h-2 bg-[#000080] rounded-full"></span>
+    <span class="ml-2">Ready</span>
+    <span class="ml-auto text-[#800000]">12:24 AM</span>
+  </div>
+</div>
+
+                    Now, generate the UI for the following user request. Remember: **ONLY RAW HTML WITH TAILWIND CLASSES.**
+                `;
+
+
+
+                
+                // 3. Make the API call to the local model
+                try {
+                    const payload = {
+                        model: 'local-model', // LM Studio uses this as a placeholder
+                        messages: [
+                            { role: 'system', content: systemPrompt },
+                            { role: 'user', content: userPrompt }
+                        ],
+                        temperature: 0.7, // A little creativity is good for UI
+                        stream: false
+                    };
+
+                    console.log("Sending payload to LM Studio:", payload);
+                    const requestBody = JSON.stringify(payload);
+                    console.log("Request body (JSON string):", requestBody);
+
+                    const response = await fetch(API_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: requestBody
+                    });
+
+                    if (!response.ok) {
+                        const errorText = await response.text(); // Get raw text for more info
+                        console.error("API Error Response Status:", response.status, response.statusText);
+                        console.error("API Error Response Body:", errorText);
+                        // Enhance error message to specifically mention CORS
+                        throw new Error(`API Error: ${response.status} ${response.statusText}. 
+                            This is often due to a CORS issue. Please ensure LM Studio allows requests from your origin (http://127.0.0.1:3000).
+                            Response: ${errorText.substring(0, 200)}... (Check console for full details)`);
+                    }
+
+                    const data = await response.json();
+                    console.log("Received data from LM Studio:", data);
+                    
+                    if (data.choices && data.choices.length > 0 && data.choices[0].message && data.choices[0].message.content) {
+                        const generatedHtml = data.choices[0].message.content;
+                        const cleanedHtml = cleanHtmlResponse(generatedHtml);
+                        console.log("Cleaned HTML for injection:", cleanedHtml);
+                        
+                        // 4. Inject the generated UI into the container
+                        contentContainer.innerHTML = cleanedHtml;
+                    } else {
+                        console.warn("Received unexpected response structure:", data);
+                        throw new Error("Received an empty or invalid response structure from the model. Check LM Studio logs and console for details.");
+                    }
+
+                } catch (error) {
+                    console.error('Error generating UI:', error);
+                    // Display a more helpful error message to the user
+                    errorDisplay.innerHTML = `
+                        <h3 class="text-xl font-semibold text-red-500">Failed to Generate UI</h3>
+                        <p class="mt-2 text-red-300">Could not get a valid response from the model at <strong>${API_URL}</strong>.</p>
+                        <p class="mt-2 text-gray-400">Please check the following:</p>
+                        <ul class="list-disc list-inside text-left text-gray-400/80 mt-2 max-w-md mx-auto">
+                            <li>LM Studio is running and the server has been started.</li>
+                            <li>The correct model is loaded in the LM Studio server tab.</li>
+                            <li>**Crucially: Check your browser's Developer Console (F12) for CORS errors or blocked requests in the Network tab.**</li>
+                            <li>**If you see CORS errors, you MUST configure LM Studio to allow CORS, or use a browser extension like "CORS Anywhere" for development.**</li>
+                        </ul>
+                        <p class="mt-3 text-gray-500 text-sm font-mono bg-gray-900/50 p-2 rounded-md">Error: ${error.message}</p>
+                    `;
+                    errorDisplay.classList.remove('hidden');
+                } finally {
+                    // 5. Hide loading indicator regardless of outcome
+                    loadingIndicator.classList.add('hidden');
+                    loadingIndicator.classList.remove('flex');
+                }
+            }
+            
+            /**
+             * This function is attached to the window object to be globally accessible
+             * by the HTML generated by the LLM. It's the engine for the "recursive" UI generation.
+             * @param {string} nextPrompt - The prompt for the next UI to be generated.
+             */
+            window.generateNextUI = function(nextPrompt) {
+                console.log(`Next UI requested with prompt: "${nextPrompt}"`);
+                // Set the main input to the new prompt for context, though it's not strictly necessary
+                promptInput.value = nextPrompt;
+                fetchAndRenderUI(nextPrompt);
+            }
+
+            // --- EVENT LISTENERS ---
+            // Handle the initial generation button click
+            generateButton.addEventListener('click', () => {
+                console.log("Generate button clicked!");
+                const prompt = promptInput.value.trim();
+                console.log("Current prompt input:", prompt);
+
+                if (prompt) {
+                    fetchAndRenderUI(prompt);
+                } else {
+                    console.log("No prompt entered, showing 'Prompt Required' message.");
+                    // Display a message instead of alert()
+                    errorDisplay.innerHTML = `
+                        <h3 class="text-xl font-semibold text-yellow-500">Prompt Required</h3>
+                        <p class="mt-2 text-yellow-300">Please enter a description of the UI you want to generate.</p>
+                    `;
+                    errorDisplay.classList.remove('hidden');
+                    // Temporarily hide welcome message if an error is shown
+                    welcomeMessage.classList.add('hidden');
+                }
+            });
+            
+            // Allow pressing Enter in the input field
+            promptInput.addEventListener('keyup', (event) => {
+                if (event.key === 'Enter') {
+                    console.log("Enter key pressed in prompt input.");
+                    generateButton.click();
+                }
+            });
+        }); // End DOMContentLoaded listener
+    </script>
+    
+</body>
+</html>
